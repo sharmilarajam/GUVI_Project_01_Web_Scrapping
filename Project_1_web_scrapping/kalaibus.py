@@ -37,7 +37,7 @@ def fetch_data(query):
     finally:
         connection.close()
 
-# Streamlit app layout
+# Streamlit app layoute
 def main():
     st.set_page_config(page_title="Redbus Clone", page_icon="🚌", layout="wide")
 
@@ -73,7 +73,7 @@ def main():
     st.markdown("<div class='subtitle'>Book Your Journey Now!</div>", unsafe_allow_html=True)
 
     # SQL query to fetch data
-    query = "SELECT `Route_Name` FROM redbus.rajasthan"
+    query = "SELECT `Route_Name` FROM redbus.ap"
 
     # Fetch data
     df = fetch_data(query)
@@ -96,20 +96,22 @@ def main():
         with col3:
             # Set the minimum date to today
             min_date = date.today()
-
+        
             # Display a date input widget with restriction to today and future dates
             selected_date = st.date_input(
                     "Select a date",
                     value=min_date,       # Default date set to today
                     min_value=min_date    # Restrict past dates
                 )
+        #with col4:
+            #st.button("Search")    
 
         # Display the selected journey
         st.write(f'Your journey is from {selected_item} to {destination}')
 
         # Define the route and construct the query
         Route = selected_item + " to " + destination
-        query = f"SELECT * FROM redbus.rajasthan WHERE Route_Name ='{Route}'"
+        query = f"SELECT * FROM redbus.ap  WHERE Route_Name ='{Route}'"
 
         # Fetch bus data for the selected route
         bus_df = fetch_data(query)
@@ -121,11 +123,15 @@ def main():
         # Display bus information if available
                  
         if not bus_df.empty:
-            st.subheader("Available Buses")
+            #st.subheader("Available Buses")
+            st.markdown(
+                "<h2 style='text-align: center; color: black;'>Available Buses</h2>",
+                unsafe_allow_html=True
+            )
             
             #available_columns = df[['Bus_Name', 'Bus_Type', 'Departing_Time',  'Duration', 'Reaching_Time', 'Star_Rating',  'Price', 'Seat_Availability']]
             #bus_df = df[available_columns]
-            st.dataframe(bus_df)
+            #st.dataframe(bus_df)
             # Sorting options
             st.sidebar.header("Filter Options")
             sort_by = st.sidebar.selectbox(
@@ -143,9 +149,11 @@ def main():
         
 
            # Detailed bus information
-            st.subheader("Detailed Bus Information")
+             #st.subheader("Detailed Bus Information")
             for _, row in sorted_bus_df.iterrows():
-                with st.container():
+                col1, col2, col3 = st.columns([1, 2, 1])  # Adjust column width ratios for centering
+                with col2:  # Center column
+                 
                     st.write(f"### {row['Bus_Name']} - {row['Bus_Type']}")
                     st.write(f"**Departing Time:** {row['Departing_Time']}  |  **Reaching Time:** {row['Reaching_Time']}")
                     st.write(f"**Duration:** {row['Duration']}  |  **Star Rating:** {row['Star_Rating']} ⭐")

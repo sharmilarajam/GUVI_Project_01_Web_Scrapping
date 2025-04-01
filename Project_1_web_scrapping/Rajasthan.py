@@ -6,7 +6,7 @@ import time
 import pandas as pd
 
 # URL of the website
-URL = "https://www.redbus.in/online-booking/jksrtc/?utm_source=rtchometile"
+URL = "https://www.redbus.in/online-booking/tnstc/?utm_source=rtchometile"
 
 def initialize_driver():
     driver = webdriver.Chrome()
@@ -115,7 +115,7 @@ scrape_all_pages()
 df = pd.DataFrame(all_bus_details)
 
 # Save the DataFrame to a CSV file
-df.to_csv('jammu&kashmir.csv', index=False)
+df.to_csv('tn.csv', index=False)
 
 # Close the driver
 webdriver.quit()
