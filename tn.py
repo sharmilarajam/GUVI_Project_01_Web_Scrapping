@@ -6,7 +6,7 @@ import time
 import pandas as pd
 
 # URL of the website
-URL = "https://www.redbus.in/online-booking/tnstc/?utm_source=rtchometile"
+URL = "https://www.redbus.in/online-booking/tnstc"
 
 def initialize_driver():
     driver = webdriver.Chrome()
@@ -20,8 +20,8 @@ def load_page(driver, url):
 # Function to scrape bus routes
 def scrape_bus_routes(driver):
     route_elements = driver.find_elements(By.CLASS_NAME, 'route')
-    bus_routes_link = [route.get_attribute('href') for route in route_elements]
-    bus_routes_name = [route.text.strip() for route in route_elements]
+    bus_routes_link = [route.get_attribute('href') for route in route_elements if route.get_attribute('href')]
+    bus_routes_name = [route.text.strip() for route in route_elements if route.text.strip()]
     return bus_routes_link, bus_routes_name
 
 # Function to scrape bus details
@@ -43,30 +43,29 @@ def scrape_bus_details(driver, url, route_name):
             time.sleep(5)  # Wait for the page to load more content
 
             # Find bus item details
-            bus_name_elements = driver.find_elements(By.CLASS_NAME, "travels.lh-24.f-bold.d-color")
-            bus_type_elements = driver.find_elements(By.CLASS_NAME, "bus-type.f-12.m-top-16.l-color.evBus")
-            departing_time_elements = driver.find_elements(By.CLASS_NAME, "dp-time.f-19.d-color.f-bold")
-            duration_elements = driver.find_elements(By.CLASS_NAME, "dur.l-color.lh-24")
-            reaching_time_elements = driver.find_elements(By.CLASS_NAME, "bp-time.f-19.d-color.disp-Inline")
-            star_rating_elements = driver.find_elements(By.XPATH, "//div[@class='rating-sec lh-24']")
-            price_elements = driver.find_elements(By.CLASS_NAME, "fare.d-block")
+            bus_name_elements = driver.find_elements(By.CLASS_NAME, "travels")
+            bus_type_elements = driver.find_elements(By.CLASS_NAME, "bus-type")
+            departing_time_elements = driver.find_elements(By.CLASS_NAME, "dp-time")
+            duration_elements = driver.find_elements(By.CLASS_NAME, "dur")
+            reaching_time_elements = driver.find_elements(By.CLASS_NAME, "bp-time")
+            star_rating_elements = driver.find_elements(By.XPATH, "//div[@class='rating-sec']")
+            price_elements = driver.find_elements(By.CLASS_NAME, "fare")
 
-            # Use XPath to handle both seat availability classes
-            seat_availability_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'seat-left m-top-30') or contains(@class, 'seat-left m-top-16')]")
+            seat_availability_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'seat-left')]")
 
             bus_details = []
             for i in range(len(bus_name_elements)):
                 bus_detail = {
                     "Route_Name": route_name,
                     "Route_Link": url,
-                    "Bus_Name": bus_name_elements[i].text,
-                    "Bus_Type": bus_type_elements[i].text,
-                    "Departing_Time": departing_time_elements[i].text,
-                    "Duration": duration_elements[i].text,
-                    "Reaching_Time": reaching_time_elements[i].text,
-                    "Star_Rating": star_rating_elements[i].text if i < len(star_rating_elements) else '0',
-                    "Price": price_elements[i].text,
-                    "Seat_Availability": seat_availability_elements[i].text if i < len(seat_availability_elements) else '0'
+                    "Bus_Name": bus_name_elements[i].text if i < len(bus_name_elements) else "N/A",
+                    "Bus_Type": bus_type_elements[i].text if i < len(bus_type_elements) else "N/A",
+                    "Departing_Time": departing_time_elements[i].text if i < len(departing_time_elements) else "N/A",
+                    "Duration": duration_elements[i].text if i < len(duration_elements) else "N/A",
+                    "Reaching_Time": reaching_time_elements[i].text if i < len(reaching_time_elements) else "N/A",
+                    "Star_Rating": star_rating_elements[i].text if i < len(star_rating_elements) else "0",
+                    "Price": price_elements[i].text if i < len(price_elements) else "N/A",
+                    "Seat_Availability": seat_availability_elements[i].text if i < len(seat_availability_elements) else "0"
                 }
                 bus_details.append(bus_detail)
             return bus_details
@@ -84,29 +83,34 @@ all_bus_details = []
 
 # Function to scrape all pages
 def scrape_all_pages():
-    for page in range(1, 4):  # There are 3 pages
+    driver = initialize_driver()
+    for page in range(1, 4):  # Scrape 3 pages
         try:
-            driver = initialize_driver()
             load_page(driver, URL)
             
             if page > 1:
-                pagination_tab = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, f"//div[contains(@class, 'DC_117_pageTabs')][text()='{page}']"))
-                )
-                driver.execute_script("arguments[0].scrollIntoView();", pagination_tab)
-                driver.execute_script("arguments[0].click();", pagination_tab)
-                time.sleep(5)  # Wait for the page to load
-            
+                try:
+                    pagination_tab = WebDriverWait(driver, 10).until(
+                        EC.element_to_be_clickable((By.XPATH, f"//div[contains(@class, 'DC_117_pageTabs') and text()='{page}']"))
+                    )
+                    driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", pagination_tab)
+                    time.sleep(2)  # Allow smooth scrolling
+                    driver.execute_script("arguments[0].click();", pagination_tab)
+                    time.sleep(5)  # Wait for the page to load
+                except Exception as e:
+                    print(f"Error clicking pagination {page}: {str(e)}")
+
             all_bus_routes_link, all_bus_routes_name = scrape_bus_routes(driver)
-            # Iterate over each bus route link and scrape the details
+            
             for link, name in zip(all_bus_routes_link, all_bus_routes_name):
                 bus_details = scrape_bus_details(driver, link, name)
                 if bus_details:
                     all_bus_details.extend(bus_details)
 
-
         except Exception as e:
             print(f"Error occurred while accessing page {page}: {str(e)}")
+
+    driver.quit()  # Close the browser after all scraping is done
 
 # Scrape routes and details from all pages
 scrape_all_pages()
@@ -115,6 +119,6 @@ scrape_all_pages()
 df = pd.DataFrame(all_bus_details)
 
 # Save the DataFrame to a CSV file
-df.to_csv('tamilnadu.csv', index=False)
+df.to_csv('tn.csv', index=False)
 
-webdriver.quit()
+print("Scraping completed successfully!")
