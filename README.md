@@ -31,3 +31,9 @@ This project scrapes private and government bus details (like bus name, type, ti
 2. **Install** the required Python packages:
    ```bash
    pip install pandas selenium-stealth pymysql
+
+
+
+CSV file format will be:
+Route Name | Bus Name | Bus Type | Departure | Duration | Arrival | Star Rating | Price | Seat Availability
+Kumbakonam to Chennai | PNX Travels | AC Seater 2+2 | 08:00 AM | 5h 30m | 01:30 PM | 4.2 | INR 445 | 37 Seats available
