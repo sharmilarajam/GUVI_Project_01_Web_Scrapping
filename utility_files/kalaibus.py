@@ -72,8 +72,29 @@ def main():
     st.markdown("<div class='title'>Redbus</div>", unsafe_allow_html=True)
     st.markdown("<div class='subtitle'>Book Your Journey Now!</div>", unsafe_allow_html=True)
 
+
+   
+
+def set_bg_from_url(url):
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("{url}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+# Example usage
+set_bg_from_url("https://images.app.goo.gl/T5KarsXR3haDhzk66")
+#st.title("Streamlit App with Background from URL")
+
+
     # SQL query to fetch data
-    query = "SELECT `Route_Name` FROM redbus.ap"
+query = "SELECT `Route_Name` FROM redbus.ap"
 
     # Fetch data
     df = fetch_data(query)

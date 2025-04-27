@@ -9,7 +9,7 @@ import time
 from selenium_stealth import stealth
 
 # Change this URL to your required route
-URL = "https://www.redbus.in/search?fromCityName=CMBT,%20Chennai,%20Chennai&fromCityId=66065&srcCountry=IND&toCityName=Madurai&toCityId=126&destCountry=null&onward=2-Apr-2025&opId=0&busType=Any"
+URL = "https://www.redbus.in/search?fromCityName=Theni&fromCityId=599&srcCountry=IND&toCityName=CMBT,%20Chennai,%20Chennai&toCityId=66065&destCountry=IND&onward=26-Apr-2025&opId=0&busType=Any"
 def initialize_driver():
     """Initialize Chrome WebDriver with stealth mode."""
     options = webdriver.ChromeOptions()
@@ -93,7 +93,7 @@ def scrape_all_pages():
             print(f"Scraping page {page}...")
             
             # Get the route name and link
-            route_name = "Coimbatore to Chennai"  # Update this to dynamically get the route name
+            route_name = " "  # Update this to dynamically get the route name
             route_link = URL  # Link to the current route (or modify as needed)
             
             bus_details = scrape_bus_details(driver, route_name, route_link)
@@ -125,7 +125,7 @@ bus_data = scrape_all_pages()
 # Convert data to DataFrame and save to CSV
 if bus_data:
     df = pd.DataFrame(bus_data)
-    df.to_csv("tn_Buses_tmp.csv", index=False)
+    df.to_csv("theni.csv", index=False)
     print("Scraping complete. Data saved to Private_Buses.csv.")
 else:
     print("No data collected. Check the website structure or elements.")
